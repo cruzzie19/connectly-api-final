@@ -1,0 +1,318 @@
+1. User Authentication & Token
+Since posts require authentication, you first need a token.
+
+1.1 Create a User (POST /posts/users/)
+Request
+Method: POST
+URL: http://127.0.0.1:8000/posts/users/
+Body (JSON):
+{
+  "username": "testuser",
+  "password": "testpassword",
+  "email": "testuser@example.com"
+}
+Response
+201 Created
+{
+  "user": {
+    "id": 1,
+    "username": "testuser",
+    "email": "testuser@example.com"
+  },
+  "token": "your_generated_token_here"
+}
+
+✅ Copy the token for authentication in later requests.
+
+1.2 Get List of Users (GET /posts/users/)
+
+Request
+Method: GET
+URL: http://127.0.0.1:8000/posts/users/
+
+Headers:
+Authorization: Token your_generated_token_here
+
+Response
+200 OK
+
+[
+  {
+    "id": 1,
+    "username": "testuser",
+    "email": "testuser@example.com",
+    "token": "your_generated_token_here"
+  }
+]
+
+2. Creating & Managing Posts
+Posts require authentication.
+
+2.1 Create a Post (POST /posts/)
+
+Request
+Method: POST
+URL: http://127.0.0.1:8000/posts/
+
+Headers:
+Authorization: Token your_generated_token_here
+
+Body (JSON):
+{
+  "title": "My First Post",
+  "content": "This is the content of my first post."
+}
+
+Response
+201 Created
+{
+  "id": 1,
+  "title": "My First Post",
+  "content": "This is the content of my first post.",
+  "author": "testuser",
+  "created_at": "2024-03-08T12:00:00Z"
+}
+
+2.2 Get All Posts (GET /posts/)
+
+Request
+Method: GET
+URL: http://127.0.0.1:8000/posts/
+
+Headers:
+Authorization: Token your_generated_token_here
+
+Response
+200 OK
+
+[
+  {
+    "id": 1,
+    "title": "My First Post",
+    "content": "This is the content of my first post.",
+    "author": "testuser",
+    "created_at": "2024-03-08T12:00:00Z"
+  }
+]
+
+2.3 Get a Specific Post (GET /posts/{id}/)
+
+Request
+Method: GET
+URL: http://127.0.0.1:8000/posts/1/
+
+Headers:
+Authorization: Token your_generated_token_here
+
+Response
+200 OK
+
+{
+  "id": 1,
+  "title": "My First Post",
+  "content": "This is the content of my first post.",
+  "author": "testuser",
+  "created_at": "2024-03-08T12:00:00Z"
+}
+
+2.4 Update a Post (PUT /posts/{id}/)
+
+Request
+Method: PUT
+URL: http://127.0.0.1:8000/posts/1/
+
+Headers:
+Authorization: Token your_generated_token_here
+
+Body (JSON):
+{
+  "title": "Updated Title",
+  "content": "Updated content of the post."
+}
+
+Response
+200 OK
+
+{
+  "id": 1,
+  "title": "Updated Title",
+  "content": "Updated content of the post.",
+  "author": "testuser",
+  "created_at": "2024-03-08T12:00:00Z"
+}
+
+2.5 Delete a Post (DELETE /posts/{id}/)
+
+Request
+Method: DELETE
+URL: http://127.0.0.1:8000/posts/1/
+
+Headers:
+Authorization: Token your_generated_token_here
+
+Response
+204 No Content
+
+3. Liking & Unliking Posts
+3.1 Like a Post (POST /posts/{id}/like/)
+
+Request
+Method: POST
+URL: http://127.0.0.1:8000/posts/1/like/
+
+Headers:
+Authorization: Token your_generated_token_here
+Response
+201 Created
+
+{
+  "message": "Post liked."
+}
+
+3.2 Unlike a Post (POST /posts/{id}/like/)
+If you send the same request again, it will remove the like.
+Response
+200 OK
+
+{
+  "message": "Like removed."
+}
+
+4. Creating & Managing Comments
+4.1 Create a Comment (POST /posts/{id}/comments/)
+
+Request
+Method: POST
+URL: http://127.0.0.1:8000/posts/1/comments/
+
+Headers:
+Authorization: Token your_generated_token_here
+
+Body (JSON):
+{
+  "content": "This is my comment."
+}
+
+Response
+201 Created
+
+{
+  "id": 1,
+  "content": "This is my comment.",
+  "author": "testuser",
+  "post": 1,
+  "created_at": "2024-03-08T12:10:00Z"
+}
+
+4.2 Get Comments for a Post (GET /posts/{id}/comments/)
+
+Request
+Method: GET
+URL: http://127.0.0.1:8000/posts/1/comments/
+
+Headers:
+Authorization: Token your_generated_token_here
+
+Response
+200 OK
+
+[
+  {
+    "id": 1,
+    "content": "This is my comment.",
+    "author": "testuser",
+    "post": 1,
+    "created_at": "2024-03-08T12:10:00Z"
+  }
+]
+
+4.3 Update a Comment (PUT /posts/comments/{id}/)
+
+Request
+Method: PUT
+URL: http://127.0.0.1:8000/posts/comments/1/
+
+Headers:
+Authorization: Token your_generated_token_here
+
+Body (JSON):
+{
+  "content": "Updated comment."
+}
+
+Response
+200 OK
+{
+  "id": 1,
+  "content": "Updated comment.",
+  "author": "testuser",
+  "post": 1,
+  "created_at": "2024-03-08T12:10:00Z"
+}
+
+
+4.4 Delete a Comment (DELETE /posts/comments/{id}/)
+
+Request
+Method: DELETE
+URL: http://127.0.0.1:8000/posts/comments/1/
+
+Headers:
+Authorization: Token your_generated_token_here
+
+Response
+204 No Content
+
+
+2️⃣ Google Login Authentication
+✅ Google Login Redirect
+Method: GET
+URL: http://127.0.0.1:8000/posts/api/v1/auth/google/
+Expected Behavior: 200 OK
+
+For further testing, use browser to make sure it login successfully as you need to login your google account
+
+✅ Google Login Callback
+Method: GET
+URL:http://127.0.0.1:8000/accounts/google/login/callback/?code=YOUR_AUTH_CODE (auth code can be seen at http://127.0.0.1:8000/posts/api/v1/auth/google/)
+OR (Postman Test Using POST)
+Method: POST
+URL: http://127.0.0.1:8000/accounts/google/login/callback/
+Body (JSON):
+{
+    "code": "YOUR_AUTH_CODE"
+}
+Expected Response: 200 OK
+
+3️⃣ Post Management
+✅ Create a Post (Requires Authentication)
+
+Method: POST
+URL: http://127.0.0.1:8000/posts/posts/
+
+Headers:
+Authorization: Token YOUR_AUTH_TOKEN
+
+Body (JSON):
+{
+    "title": "My First Post",
+    "content": "Hello, this is a test post!"
+}
+Expected Response:
+A new post is created.
+The response contains post details.
+
+5️⃣ News Feed
+✅ Fetch Latest Posts
+
+Method: GET
+URL: http://127.0.0.1:8000/posts/newsfeed/
+Headers:
+Authorization: Token YOUR_AUTH_TOKEN
+Expected Response:
+Latest 10 posts.
+
+6️⃣ Logout
+✅ Logout
+Method: GET
+URL: http://127.0.0.1:8000/posts/logout
