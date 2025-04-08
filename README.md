@@ -207,10 +207,8 @@ python app.py
 
 ### RBAC (Role-Based Access Control)
 
-#### User Model
-
 - **File:** [posts/models.py](https://github.com/cruzzie19/connectly-api-final/blob/main/posts/models.py)
-- **Description:** The `User` model includes a `role` field with choices for 'admin', 'user', and 'guest'.
+- **Description:** Implements role-based access control for users.
   ```python
   from django.contrib.auth.models import AbstractUser 
   from django.db import models
@@ -218,7 +216,7 @@ python app.py
   class User(AbstractUser):
       email = models.EmailField(unique=True)
       created_at = models.DateTimeField(auto_now_add=True)
-      role = models.CharField(max_length=10, choices=[('admin', 'Admin'), ('user', 'User'), ('guest', 'Guest')], default='user')
+      role = models.CharField(max_length=10, choices=[('admin', 'Admin'), ('user', 'User '), ('guest', 'Guest')], default='user')
   
       REQUIRED_FIELDS = ['email']
   
@@ -226,58 +224,20 @@ python app.py
           return self.username
   ```
 
-#### Role-Based Access Control in Views
-
-- **File:** [posts/views.py](https://github.com/cruzzie19/connectly-api-final/blob/main/posts/views.py)
-- **Description:** The `PostDetail` view includes logic to check if the user is the author of the post or an admin before allowing deletion.
-  ```python
-  class PostDetail(generics.RetrieveUpdateDestroyAPIView):
-      queryset = Post.objects.all()
-      serializer_class = PostSerializer
-      permission_classes = [permissions.IsAuthenticated]
-  
-      def get(self, request, *args, **kwargs):
-          post = self.get_object()
-          if post.privacy == 'private' and post.author != request.user:
-              return Response({"error": "You do not have permission to view this post."}, status=status.HTTP_403_FORBIDDEN)
-          return super().get(request, *args, **kwargs)
-  
-      def delete(self, request, *args, **kwargs):
-          post = self.get_object()
-          # Check if the user is the author of the post or an admin
-          if post.author != request.user and request.user.role != 'admin':
-              return Response({"error": "You do not have permission to delete this post."}, status=status.HTTP_403_FORBIDDEN)
-          
-          # Proceed with deletion
-          self.perform_destroy(post)
-          return Response(status=status.HTTP_204_NO_CONTENT)
-  ```
-
 ### Privacy Settings
 
-- **File:** [posts/views.py](https://github.com/cruzzie19/connectly-api-final/blob/main/posts/views.py)
+- **File:** [posts/models.py](https://github.com/cruzzie19/connectly-api-final/blob/main/posts/models.py)
 - **Description:** Implements privacy settings for posts.
   ```python
-  class PostDetail(generics.RetrieveUpdateDestroyAPIView):
-      queryset = Post.objects.all()
-      serializer_class = PostSerializer
-      permission_classes = [permissions.IsAuthenticated]
+  class Post(models.Model):
+      content = models.TextField()
+      author = models.ForeignKey(User, on_delete=models.CASCADE)
+      created_at = models.DateTimeField(auto_now_add=True)
+      likes = models.ManyToManyField(User, related_name='liked_posts', blank=True)
+      privacy = models.CharField(max_length=10, choices=[('public', 'Public'), ('private', 'Private')], default='public')
   
-      def get(self, request, *args, **kwargs):
-          post = self.get_object()
-          if post.privacy == 'private' and post.author != request.user:
-              return Response({"error": "You do not have permission to view this post."}, status=status.HTTP_403_FORBIDDEN)
-          return super().get(request, *args, **kwargs)
-  
-      def delete(self, request, *args, **kwargs):
-          post = self.get_object()
-          # Check if the user is the author of the post or an admin
-          if post.author != request.user and request.user.role != 'admin':
-              return Response({"error": "You do not have permission to delete this post."}, status=status.HTTP_403_FORBIDDEN)
-          
-          # Proceed with deletion
-          self.perform_destroy(post)
-          return Response(status=status.HTTP_204_NO_CONTENT)
+      def __str__(self):
+          return f"Post by {self.author.username}"
   ```
 
 ## Contributing
